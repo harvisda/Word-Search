@@ -1,0 +1,280 @@
+"""
+Puzzle 1 and 2 are main examples of the format of imported data
+"""
+
+PUZZLE1 = '''
+kbnhwkcq
+kbxenmhy
+ormviaek
+ciebcric
+narrkzzi
+jniioirn
+tecamean
+ubinkhmg
+'''
+
+PUZZLE2 = '''
+drbexbeczkqkyoidmwnk
+wawbpelnsfptqoiuuksu
+iuagydgeygafktkutpme
+zymbtmdlqkhmhvjdsggh
+uhzrhplephdydhzkcztf
+emmiojwrmarziehkisui
+jdlanstiwjnnltoronto
+juhnonfchzcloiivgydv
+osbsbpgsschdlmehhtri
+sxykfdngfwziyrwpliwh
+qnjamjinmlwgixhjbsig
+dnxaiscqihbxubotvrdu
+xsmcklkmrmrmoncmsebo
+wmrmpjxmfribkispbvyr
+wvkafogpryafyclwjido
+vpdrqboqkondjkrsznvb
+beyzcryltfqwwjgkzuer
+xtdihdjbgvjeoxloosja
+owuegvgtuppiyikavjrc
+obqhtorxdbdtsncvfows
+'''
+
+
+def rotate_puzzle(puzzle):
+    '''(str) -> str
+    Return the puzzle rotated 90 degrees to the left.
+    REQ: puzzle is a 'rectangular' string with the same number of characters in every
+    line/column
+    '''
+
+    raw_rows = puzzle.split('\n')
+    rows = []
+# if blank lines or trailing spaces are present, remove them
+    for row in raw_rows:
+        row = row.strip()
+        if row:
+            rows.append(row)
+
+# calculate number of rows and columns in original puzzle
+    num_rows = len(rows)
+    num_cols = len(rows[0])
+
+# an empty row in the rotated puzzle
+    empty_row = [''] * num_rows
+
+# create blank puzzle to store the rotation
+    rotated = []
+    for row in range(num_cols):
+        rotated.append(empty_row[:])
+    for x in range(num_rows):
+        for y in range(num_cols):
+            rotated[y][x] = rows[x][num_cols - y - 1]
+
+    # construct new rows from the lists of rotated
+    new_rows = []
+    for rotated_row in rotated:
+        new_rows.append(''.join(rotated_row))
+
+    rotated_puzzle = '\n'.join(new_rows)
+
+    return rotated_puzzle
+
+
+def lr_occurrences(puzzle, word):
+    '''(str, str) -> int
+    Return the number of times word is found in puzzle in the
+    left-to-right direction only.
+
+    >>> lr_occurrences('xaxy\nyaaa', 'xy')
+    1
+    '''
+    return puzzle.count(word)
+
+
+def total_occurrences(puzzle, word):
+    '''(str, str) -> int
+    Return total occurrences of word in puzzle.
+    All four directions are counted as occurrences:
+    left-to-right, top-to-bottom, right-to-left, and bottom-to-top.
+
+    >>> total_occurrences('xaxy\nyaaa', 'xy')
+    2
+    >>> total_occurrences(PUZZLE1, 'nick')
+    2
+    '''
+    # create the each of the new rotated puzzles 
+    puzzle_rotation1 = rotate_puzzle(puzzle)
+    puzzle_rotation2 = rotate_puzzle(puzzle_rotation1)   
+    puzzle_rotation3 = rotate_puzzle(puzzle_rotation2)      
+    # sum up the total of each of the occurences in the orginal puzzle and the 
+    # rotated puzzle 
+    total= ((lr_occurrences(puzzle,word))+
+            (lr_occurrences(puzzle_rotation1,word))+
+            (lr_occurrences(puzzle_rotation2,word))+
+            (lr_occurrences(puzzle_rotation3,word)))
+    #returns the total occurences 
+    return (total)
+
+
+def in_puzzle_horizontal(puzzle, word):
+    '''(str, str) -> bool
+    Checks whether the word shows up in the puzzle from either left-to-right or 
+    from right-to-left and returns the result
+    >>> in_puzzle_horizontal('xaxy\nyaaa', 'xy')
+    True 
+    >>> in_puzzle_horizontal(PUZZLE1, 'nick')
+    False
+    '''
+    
+    # create a rotated version of the puzzle so that it checks right to left 
+    puzzle_rotation1 = rotate_puzzle(puzzle)
+    puzzle_rotation2 = rotate_puzzle(puzzle_rotation1)  
+    # check the number of times the word shows up in the puzzle from left to 
+    # right and right to left and see if either are greater then 1. If either  
+    # case has occured then the word appears in the horizontal direction 
+    if lr_occurrences(puzzle_rotation2,word)>0 or lr_occurrences(puzzle,word)>0:
+        return (True)    
+    # if not return false
+    else: 
+        return (False)
+
+
+def in_puzzle_vertical(puzzle, word):
+    '''(str, str) -> bool
+    Checks whether the word shows up in the puzzle from either left-to-right or 
+    from right-to-left and returns the result
+    >>> in_puzzle_vertical('PUZZLE1', 'kbnhwk')
+    False
+    >>> in_puzzle_vertical(PUZZLE1, 'nick')
+    True   
+    '''
+    # create a rotated versions of the puzzle so that it checks top-to-bottom
+    # and bottom-to-top
+    puzzle_rotation1 = rotate_puzzle(puzzle)
+    puzzle_rotation2 = rotate_puzzle(puzzle_rotation1)  
+    puzzle_rotation3 = rotate_puzzle(puzzle_rotation2)  
+    # check the number of times the word shows up in the puzzle from top-to 
+    # bottom and bottom-to-right. If either case happens then the word has 
+    # to occur at least once in the vertical direction 
+    if (lr_occurrences(puzzle_rotation1,word)>0 or 
+        lr_occurrences(puzzle_rotation3,word)>0):
+        return (True)    
+    # if not return false
+    else: 
+        return (False)
+
+def in_puzzle(puzzle, word):
+    '''(str, str) -> bool
+    Checks whether the word (input) shows up in the puzzle from any direction
+    >>> in_puzzle_vertical('PUZZLE1', 'nick')
+    True
+    >>> in_puzzle_vertical(PUZZLE1, 'nick123')
+    False 
+    '''    
+    # Use the 'in_puzzle_vertical' and 'in_puzzle_horizontal' to see if they 
+    # in those directions and if they do then it means the the word occurs in 
+    # in the puzzle 
+    if (in_puzzle_vertical(puzzle, word) == True or 
+        in_puzzle_horizontal(puzzle, word) == True): 
+        return (True)
+    # If not that means the word does not occur in the puzzle and returns False
+    else: 
+        return (False) 
+
+
+def in_exactly_one_dimension(puzzle, word):
+    '''(str, str) -> bool
+    Checks whether the word (input) shows up in the puzzle from any direction
+    >>> in_exactly_one_dimension('PUZZLE1', 'in')
+    False
+    >>> in_exactly_one_dimension(PUZZLE1, 'nick')
+    True
+    '''    
+    # Use the functions 'in_puzzle_vertical' and 'in_puzzle_horizontal' 
+    # if the 2 functions and if they are not equal then we know that it word 
+    # occurs in only 1 function 
+    if ((in_puzzle_vertical(puzzle, word) != in_puzzle_horizontal(puzzle, word))
+        and ((in_puzzle_vertical(puzzle, word) == True or 
+             in_puzzle_horizontal(puzzle, word) == True))):
+        return (True)         
+
+    # If the function occurs in both direction or does not appear then the 2
+    # functions are equal and returns False
+    else: 
+        return (False) 
+    
+
+def all_horizontal(puzzle, word):
+    # if the word is not found vertically that means its either found 
+    # horizontally or not at all. both of which will return True 
+    if (in_puzzle_vertical(puzzle, word) == False):
+        return (True)  
+    # if not then it will return False
+    else: 
+        return (False)          
+    '''(str, str) -> bool
+    Checks whether the word (input) shows up in the puzzle from vertical 
+    direction. 
+    >>> all_horizontal('PUZZLE1', 'nick')
+    False
+    >>> all_horizontal(PUZZLE1, 'cam')
+    True
+    '''      
+    
+
+def at_most_one_vertical(puzzle, word):
+    # checks if the word is found vertically and then checks if the the total 
+    # occurences in the puzzle is equal to 1 
+    if (in_puzzle_vertical(puzzle, word) == True and 
+        total_occurrences(puzzle, word) == 1):
+        return (True)  
+    else: 
+        return (False)          
+    '''(str, str) -> bool
+    Checks whether the word (input) can be found in the puzzle from a vertical 
+    position
+    >>> at_most_one_vertical('PUZZLE1', 'in')
+    False
+    >>> at_most_one_vertical(PUZZLE1, 'nick')
+    True
+    '''  
+
+
+def do_tasks(puzzle, word):
+    '''(str, str) -> NoneType
+    puzzle is a word search puzzle and word is a word.
+    Carry out the tasks specified here and in the handout.
+    '''
+
+    print('Number of times',word, 'occurs left-to-right: ', end='')
+    # using the lr_occurences functions counts the total occurrences that 
+    # the varible shows up in the given puzzle 
+    print(lr_occurrences(puzzle,word))     
+    
+    # create a new varible (puzzle_rotation1) to hold the 90 degrees 
+    # rotated puzzle 
+    puzzle_rotation1 = rotate_puzzle(puzzle)
+    # count the number of occurences in the new puzzle 
+    print('Number of times', word, 'occurs top-to-bottom: ', end='')
+    print(lr_occurrences(puzzle_rotation1,word))
+
+    # create a new varible (puzzle_rotation2) to hold the 90 degrees 
+    # rotated puzzle that has been previous rotated (puzzle_rotation1)
+    puzzle_rotation2 = rotate_puzzle(puzzle_rotation1)
+    # count the number of occurences in the new puzzle 
+    print('Number of times', word, 'occurs right-to-left: ', end='')
+    print(lr_occurrences(puzzle_rotation2,word))
+    
+    # create a new varible (puzzle_rotation3) to hold the 90 degrees 
+    # rotated puzzle that has been previous rotated twice (puzzle_rotation2)
+    puzzle_rotation3 = rotate_puzzle(puzzle_rotation2)
+    # count the number of occurences in the new puzzle 
+    print('Number of times', word, 'occurs bottom-to-top: ', end='')
+    print(lr_occurrences(puzzle_rotation3,word))
+    
+
+    # Print a single number, dislaying total occurences.
+    print(total_occurrences(puzzle, word))
+    
+    # Print a single number, dislaying Horizontal.
+    print(in_puzzle_horizontal(puzzle, word))
+    
+    ### End on functions###
+
